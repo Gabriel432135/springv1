@@ -1,0 +1,6 @@
+INSERT INTO role (role_name) VALUES 
+('ROLE_USER'),
+('ROLE_ADMIN'),
+('ROLE_MODERATOR'),
+('ROLE_GUEST'),
+('ROLE_SUPER_ADMIN');
