@@ -36,10 +36,13 @@ public class SecurityFilter extends OncePerRequestFilter{
             if(!emailSubject.isBlank()){
                 UserDetails usuario = usuarioRepository.findByEmail(emailSubject);
 
-                //Geração de um token de credenciais para o spring, contendo o usuario e as roles dele
-                var authenticationToken = new UsernamePasswordAuthenticationToken(usuario, null, usuario.getAuthorities());
-
-                SecurityContextHolder.getContext().setAuthentication(authenticationToken);
+                //Geração de um token de credenciais para o spring, contendo o usuario e as roles dele. Pode dar exception caso o token seja de um usuário que não existe mais.
+                try{
+                    var authenticationToken = new UsernamePasswordAuthenticationToken(usuario, null, usuario.getAuthorities());
+                    SecurityContextHolder.getContext().setAuthentication(authenticationToken);
+                }catch(NullPointerException exception){
+                    System.out.println("\""+emailSubject+"\" não existe na base de dados");
+                }
             }
         }
         filterChain.doFilter(request, response); //Vá para o próximo filtro, passando request e response para ele
