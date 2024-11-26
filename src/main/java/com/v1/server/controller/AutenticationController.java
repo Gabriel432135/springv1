@@ -20,6 +20,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
@@ -44,7 +45,7 @@ public class AutenticationController {
     TokenService tokenService;
 
     @PostMapping("/login")
-    public ResponseEntity login(@RequestBody  AuthenticationDTO authenticationDTO) {
+    public ResponseEntity<LoginResponseDTO> login(@RequestBody  @Validated AuthenticationDTO authenticationDTO) {
         var emailPassword = new UsernamePasswordAuthenticationToken(authenticationDTO.email(), authenticationDTO.senha());
         var auth = authenticationManager.authenticate(emailPassword);
         var tokenDeUsuario = tokenService.generateToken((Usuario) auth.getPrincipal());
@@ -53,7 +54,7 @@ public class AutenticationController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<RegisterDTO> register(@RequestBody RegisterDTO registerDTO) {
+    public ResponseEntity<RegisterDTO> register(@RequestBody @Validated RegisterDTO registerDTO) {
         if(this.usuarioService.buscaruUsuarioByEmail(registerDTO.email())!=null) return ResponseEntity.badRequest().build();
         var encriptedPassword = bCryptPasswordEncoder.encode(registerDTO.senha());
         

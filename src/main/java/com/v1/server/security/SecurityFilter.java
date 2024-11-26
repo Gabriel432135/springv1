@@ -3,6 +3,7 @@ package com.v1.server.security;
 import java.io.IOException;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.lang.NonNull;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -27,17 +28,19 @@ public class SecurityFilter extends OncePerRequestFilter{
     UsuarioRepository usuarioRepository;
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+    protected void doFilterInternal(@NonNull HttpServletRequest request, @NonNull HttpServletResponse response, @NonNull FilterChain filterChain) throws ServletException, IOException {
         String token = this.recoverToken(request); //Recuperamos o token do campo Authorization no request
         if(token != null){
             //Pega o email caso a validação seja feita com sucesso
             String emailSubject = tokenService.validateToken(token);
-            UserDetails usuario = usuarioRepository.findByEmail(emailSubject);
+            if(!emailSubject.isBlank()){
+                UserDetails usuario = usuarioRepository.findByEmail(emailSubject);
 
-            //Geração de um token de credenciais para o spring, contendo o usuario e as roles dele
-            var authenticationToken = new UsernamePasswordAuthenticationToken(usuario, null, usuario.getAuthorities());
+                //Geração de um token de credenciais para o spring, contendo o usuario e as roles dele
+                var authenticationToken = new UsernamePasswordAuthenticationToken(usuario, null, usuario.getAuthorities());
 
-            SecurityContextHolder.getContext().setAuthentication(authenticationToken);
+                SecurityContextHolder.getContext().setAuthentication(authenticationToken);
+            }
         }
         filterChain.doFilter(request, response); //Vá para o próximo filtro, passando request e response para ele
     }
